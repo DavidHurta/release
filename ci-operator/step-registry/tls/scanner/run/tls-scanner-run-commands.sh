@@ -76,6 +76,7 @@ spec:
         --log-file /results/scan.log 2>&1 | tee /results/output.log
       SCAN_EXIT_CODE=\${PIPESTATUS[0]}
       echo "Scan complete. Exit code: \${SCAN_EXIT_CODE}"
+      touch /results/scan.done
       # Keep pod alive for artifact collection
       sleep 120
       # We are intentionally ignoring the scanner exit code for the moment
@@ -116,11 +117,9 @@ while true; do
     if [[ "$phase" == "Succeeded" || "$phase" == "Failed" ]]; then
         break
     fi
-    if oc exec pod/tls-scanner -n "${NAMESPACE}" -- test -f /results/output.log 2>/dev/null; then
-        if oc exec pod/tls-scanner -n "${NAMESPACE}" -- grep -q "Scan complete" /results/output.log 2>/dev/null; then
-            echo "Scan complete detected, collecting artifacts..."
-            break
-        fi
+    if oc exec pod/tls-scanner -n "${NAMESPACE}" -- test -f /results/scan.done 2>/dev/null; then
+        echo "Scan complete detected, collecting artifacts..."
+        break
     fi
     sleep 15
 done

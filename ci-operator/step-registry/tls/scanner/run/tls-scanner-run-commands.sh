@@ -64,18 +64,22 @@ spec:
   - name: scanner
     image: ${SCANNER_IMAGE}
     command:
-    - /bin/sh
+    - /bin/bash
     - -c
     - |
+      set -o pipefail
       mkdir -p /results
       /usr/local/bin/tls-scanner -j 4 ${SCANNER_ARGS} \
         --json-file /results/results.json \
         --csv-file /results/results.csv \
         --junit-file /results/junit_tls_scan.xml \
         --log-file /results/scan.log 2>&1 | tee /results/output.log
-      echo "Scan complete. Exit code: \$?"
+      SCAN_EXIT_CODE=\${PIPESTATUS[0]}
+      echo "Scan complete. Exit code: \${SCAN_EXIT_CODE}"
       # Keep pod alive for artifact collection
       sleep 120
+      # We are intentionally ignoring the scanner exit code for the moment
+      # exit \${SCAN_EXIT_CODE}
     resources:
       requests:
         cpu: "4"

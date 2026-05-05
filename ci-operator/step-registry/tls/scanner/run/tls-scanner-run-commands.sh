@@ -134,7 +134,7 @@ fi
 
 wait $LOGS_PID 2>/dev/null || true
 
-oc wait --for=jsonpath='{.status.phase}'=Succeeded pod/tls-scanner -n "${NAMESPACE}" --timeout=4h || {
+oc wait --for=jsonpath='{.status.phase}'=Succeeded pod/tls-scanner -n "${NAMESPACE}" --timeout=10m || {
     echo "Scanner did not complete successfully"
     oc describe pod/tls-scanner -n "${NAMESPACE}"
     exit 1
